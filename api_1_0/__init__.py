@@ -12,9 +12,9 @@ def init_router(app):
 
     # country blueprint register
     from api_1_0.countryResource import country_blueprint
-    app.register_blueprint(country_blueprint, url_prefix="/api_1_0")
+    app.register_blueprint(country_blueprint, url_prefix="/api_1_0/country")
     
     # countryInfo blueprint register
     from api_1_0.countryInfoResource import countryinfo_blueprint
-    app.register_blueprint(countryinfo_blueprint, url_prefix="/api_1_0")
+    app.register_blueprint(countryinfo_blueprint, url_prefix="/api_1_0/countryInfo")
     

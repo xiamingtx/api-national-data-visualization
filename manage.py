@@ -25,30 +25,32 @@ manager.add_command("runserver", Server(use_debugger=True))
 @app.before_request
 def user_validation():
     print(request.endpoint)  # 方便跟踪调试
-    
-    if not request.endpoint: # 如果请求点为空
+
+    if not request.endpoint:  # 如果请求点为空
         return jsonify(code=RET.URLNOTFOUND, message="url not found", error="url not found")
-        
+
+
 @app.before_request
 def user_require_token():
-    # 不需要token验证的请求点列表
-    permission = ['apiversion.Apiversion', 'country.Country', 'countryInfo.CountryInfo']
-
-    # 如果不是请求上述列表中的接口，需要验证token
-    if request.endpoint not in permission:
-        # 在请求头上拿到token
-        token = request.headers.get("Token")
-        if not all([token]):
-            return jsonify(code=RET.PARAMERR, message="缺少参数Token或请求非法")
-
-        # 校验token格式正确与过期时间
-        s = Serializer(app.config["SECRET_KEY"])
-        try:
-            data = s.loads(token)
-        except Exception as e:
-            app.logger.error(e)
-            # 单平台用户登录失效
-            return jsonify(code=RET.SESSIONERR, message='用户未登录或登录已过期')
+    pass
+    # # 不需要token验证的请求点列表
+    # permission = ['apiversion.Apiversion', 'country.Country', 'countryInfo.CountryInfo', 'country.countries']
+    #
+    # # 如果不是请求上述列表中的接口，需要验证token
+    # if request.endpoint not in permission:
+    #     # 在请求头上拿到token
+    #     token = request.headers.get("Token")
+    #     if not all([token]):
+    #         return jsonify(code=RET.PARAMERR, message="缺少参数Token或请求非法")
+    #
+    #     # 校验token格式正确与过期时间
+    #     s = Serializer(app.config["SECRET_KEY"])
+    #     try:
+    #         data = s.loads(token)
+    #     except Exception as e:
+    #         app.logger.error(e)
+    #         # 单平台用户登录失效
+    #         return jsonify(code=RET.SESSIONERR, message='用户未登录或登录已过期')
 
 
 # 创建全站拦截器，每个请求之后根据请求方法统一设置返回头
@@ -69,4 +71,3 @@ def process_response(response):
 
 if __name__ == "__main__":
     manager.run()
-
