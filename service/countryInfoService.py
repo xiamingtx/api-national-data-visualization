@@ -40,16 +40,17 @@ class CountryInfoService(CountryInfo):
         finally:
             db.session.close()
 
+    # 根据国家的country_id查询该国所有数据
     @classmethod
-    def get_details_by_country_id(cls, **kwargs):
-        filter_list = [cls.IsDeleted == 0, cls.CountryID == kwargs.get('CountryID')]
+    def get_details_by_country_id(cls, country_id):
+        filter_list = [cls.IsDeleted == 0, cls.CountryID == country_id]
         try:
             detail = db.session.query(cls.CountryID, cls.CountryInfoID, cls.GDP, cls.Population, cls.InfoYear,
                                       cls.AvgGDP, cls.PrimaryIndustry, cls.SecondaryIndustry, cls.TertiaryIndustry,
                                       cls.FarmingIndustry, cls.Industry, cls.ConstructionIndustry,
                                       cls.WholesaleAndRetail, cls.TransportationAndStorage, cls.AccommodationAndCatering,
                                       cls.FinancialBusiness, cls.RealtyBusiness, cls.Others, Country.CountryName) \
-                .outerjoin(Country, Country.CountryID == kwargs.get('CountryID')) \
+                .outerjoin(Country, Country.CountryID == country_id) \
                 .filter(*filter_list).order_by(cls.InfoYear.desc())
 
             count = detail.count()
@@ -63,6 +64,30 @@ class CountryInfoService(CountryInfo):
         finally:
             db.session.close()
 
+    # 根据国家的country_id查询该国最近一年数据
+    @classmethod
+    def get_recent_by_country_id(cls, country_id):
+        filter_list = [cls.IsDeleted == 0, cls.CountryID == country_id]
+        try:
+            detail = db.session.query(cls.CountryID, cls.CountryInfoID, cls.GDP, cls.Population, cls.InfoYear,
+                                      cls.AvgGDP, cls.PrimaryIndustry, cls.SecondaryIndustry, cls.TertiaryIndustry,
+                                      cls.FarmingIndustry, cls.Industry, cls.ConstructionIndustry,
+                                      cls.WholesaleAndRetail, cls.TransportationAndStorage,
+                                      cls.AccommodationAndCatering,
+                                      cls.FinancialBusiness, cls.RealtyBusiness, cls.Others, Country.CountryName) \
+                .outerjoin(Country, Country.CountryID == country_id) \
+                .filter(*filter_list).order_by(cls.InfoYear.desc())
+
+            results = commons.query_to_dict(detail.first())
+
+            return {'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': results}
+        except Exception as e:
+            loggings.exception(1, e)
+            return {'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {'error': str(e)}}
+        finally:
+            db.session.close()
+
+    # 查询所有国家的详情数据
     @classmethod
     def get_all_details(cls):
         filter_list = [cls.IsDeleted == 0]

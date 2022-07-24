@@ -24,22 +24,34 @@ class CountryInfoOtherResource(Resource):
 		else:
 			return jsonify(code=res['code'], message=res['message'], data=res['data'])
 
+	# 根据国家的country_id查询该国所有数据
 	@classmethod
 	def get_details_by_country_id(cls, country_id):
 
 		if country_id:
-			kwargs = {
-				'CountryID': country_id
-			}
+			res = CountryInfoService.get_details_by_country_id(country_id)
 		else:
 			return jsonify(code=RET.PARAMERR, message='缺少参数country_id')
 
-		res = CountryInfoService.get_details_by_country_id(**kwargs)
 		if res['code'] == RET.OK:
 			return jsonify(code=res['code'], message=res['message'], data=res['data'], totalCount=res['totalCount'])
 		else:
 			return jsonify(code=res['code'], message=res['message'], data=res['data'])
 
+	# 根据国家的country_id查询该国最近一年数据
+	@classmethod
+	def get_recent_by_country_id(cls, country_id):
+		if country_id:
+			res = CountryInfoService.get_recent_by_country_id(country_id)
+		else:
+			return jsonify(code=RET.PARAMERR, message='缺少参数country_id')
+
+		if res['code'] == RET.OK:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'])
+		else:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'])
+
+	# 查询所有国家的详情数据
 	@classmethod
 	def get_all_details(cls):
 		res = CountryInfoService.get_all_details()
