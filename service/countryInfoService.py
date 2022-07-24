@@ -19,24 +19,67 @@ class CountryInfoService(CountryInfo):
     @classmethod
     def get_general_info(cls, **kwargs):
         filter_list = [cls.IsDeleted == 0]
-        page = int(kwargs.get('Page', 1))
-        size = int(kwargs.get('Size', 10))
         try:
-            detail = db.session.query(
+            info = db.session.query(
                 cls.CountryID,
                 Country.CountryName,
                 cls.GDP,
                 cls.Population,
                 cls.AvgGDP
-            ).outerjoin(Country, Country.CountryID == cls.CountryID).filter(*filter_list).order_by(cls.InfoYear.desc()).group_by(cls.CountryID)
+            ).outerjoin(Country, Country.CountryID == cls.CountryID).filter(*filter_list).order_by(
+                cls.InfoYear.desc()).group_by(cls.CountryID)
+
+            count = info.count()
+
+            results = commons.query_to_dict(info.all())
+
+            return {'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'data': results}
+        except Exception as e:
+            loggings.exception(1, e)
+            return {'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {'error': str(e)}}
+        finally:
+            db.session.close()
+
+    @classmethod
+    def get_details_by_country_id(cls, **kwargs):
+        filter_list = [cls.IsDeleted == 0, cls.CountryID == kwargs.get('CountryID')]
+        try:
+            detail = db.session.query(cls.CountryID, cls.CountryInfoID, cls.GDP, cls.Population, cls.InfoYear,
+                                      cls.AvgGDP, cls.PrimaryIndustry, cls.SecondaryIndustry, cls.TertiaryIndustry,
+                                      cls.FarmingIndustry, cls.Industry, cls.ConstructionIndustry,
+                                      cls.WholesaleAndRetail, cls.TransportationAndStorage, cls.AccommodationAndCatering,
+                                      cls.FinancialBusiness, cls.RealtyBusiness, cls.Others, Country.CountryName) \
+                .outerjoin(Country, Country.CountryID == kwargs.get('CountryID')) \
+                .filter(*filter_list).order_by(cls.InfoYear.desc())
 
             count = detail.count()
-            pages = math.ceil(count / size)
-            detail = detail.limit(size).offset((page - 1) * size).all()
 
-            results = commons.query_to_dict(detail)
+            results = commons.query_to_dict(detail.all())
 
-            return {'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'totalPage': pages, 'data': results}
+            return {'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'data': results}
+        except Exception as e:
+            loggings.exception(1, e)
+            return {'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {'error': str(e)}}
+        finally:
+            db.session.close()
+
+    @classmethod
+    def get_all_details(cls):
+        filter_list = [cls.IsDeleted == 0]
+        try:
+            detail = db.session.query(cls.CountryID, cls.CountryInfoID, cls.GDP, cls.Population, cls.InfoYear,
+                                      cls.AvgGDP, cls.PrimaryIndustry, cls.SecondaryIndustry, cls.TertiaryIndustry,
+                                      cls.FarmingIndustry, cls.Industry, cls.ConstructionIndustry,
+                                      cls.WholesaleAndRetail, cls.TransportationAndStorage, cls.AccommodationAndCatering,
+                                      cls.FinancialBusiness, cls.RealtyBusiness, cls.Others, Country.CountryName) \
+                .outerjoin(Country, Country.CountryID == cls.CountryID) \
+                .filter(*filter_list).order_by(cls.InfoYear.desc())
+
+            count = detail.count()
+
+            results = commons.query_to_dict(detail.all())
+
+            return {'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'data': results}
         except Exception as e:
             loggings.exception(1, e)
             return {'code': RET.DBERR, 'message': error_map_EN[RET.DBERR], 'data': {'error': str(e)}}

@@ -65,13 +65,15 @@ class CountryController(Country):
             page = int(kwargs.get('Page', 1))
             size = int(kwargs.get('Size', 10))
             
-            country_info = db.session.query(cls).filter(*filter_list)
+            country_info = db.session.query(cls.CountryID,
+                                            cls.CountryName,).filter(*filter_list)
             
             count = country_info.count()
             pages = math.ceil(count / size)
             country_info = country_info.limit(size).offset((page - 1) * size).all()
-   
+
             results = commons.query_to_dict(country_info)
+
             return {'code': RET.OK, 'message': error_map_EN[RET.OK], 'totalCount': count, 'totalPage': pages, 'data': results}
             
         except Exception as e:

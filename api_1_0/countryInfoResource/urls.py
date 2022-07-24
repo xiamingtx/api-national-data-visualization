@@ -17,3 +17,12 @@ api.add_resource(CountryInfoResource, '/<CountryInfoID>', endpoint='CountryInfo'
 def get_general_info():
     return CountryInfoOtherResource.get_general_info()
 
+
+@countryinfo_blueprint.route('/details/<country_id>', methods=['GET'], endpoint='details')
+def get_details_by_country_id(country_id):
+    return CountryInfoOtherResource.get_details_by_country_id(country_id)
+
+
+@countryinfo_blueprint.route('/all', methods=['GET'], endpoint='all')
+def get_all_details():
+    return CountryInfoOtherResource.get_all_details()

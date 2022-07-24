@@ -14,16 +14,36 @@ class CountryInfoOtherResource(Resource):
 	@classmethod
 	def get_general_info(cls):
 		parser = reqparse.RequestParser()
-		parser.add_argument('Page', location='args', required=False, help='Page参数类型不正确或缺失')
-		parser.add_argument('Size', location='args', required=False, help='Size参数类型不正确或缺失')
 
 		kwargs = parser.parse_args()
 		kwargs = commons.put_remove_none(**kwargs)
 
 		res = CountryInfoService.get_general_info(**kwargs)
 		if res['code'] == RET.OK:
-			return jsonify(code=res['code'], message=res['message'], data=res['data'], totalPage=res['totalPage'],
-						   totalCount=res['totalCount'])
+			return jsonify(code=res['code'], message=res['message'], data=res['data'], totalCount=res['totalCount'])
 		else:
 			return jsonify(code=res['code'], message=res['message'], data=res['data'])
 
+	@classmethod
+	def get_details_by_country_id(cls, country_id):
+
+		if country_id:
+			kwargs = {
+				'CountryID': country_id
+			}
+		else:
+			return jsonify(code=RET.PARAMERR, message='缺少参数country_id')
+
+		res = CountryInfoService.get_details_by_country_id(**kwargs)
+		if res['code'] == RET.OK:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'], totalCount=res['totalCount'])
+		else:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'])
+
+	@classmethod
+	def get_all_details(cls):
+		res = CountryInfoService.get_all_details()
+		if res['code'] == RET.OK:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'], totalCount=res['totalCount'])
+		else:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'])
