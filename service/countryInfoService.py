@@ -11,7 +11,8 @@ from models.countryModel import Country
 from utils import commons
 from utils.loggings import loggings
 from utils.response_code import RET, error_map_EN
-from queue import Queue
+# from queue import Queue
+from utils.myQueue import Queue
 
 
 class CountryInfoService(CountryInfo):
@@ -116,7 +117,7 @@ class CountryInfoService(CountryInfo):
         finally:
             db.session.close()
 
-    # 预测
+    # 预测功能实现
     @classmethod
     def forecast(cls, country_id):
         filter_list = [cls.IsDeleted == 0, cls.CountryID == country_id]
@@ -127,7 +128,7 @@ class CountryInfoService(CountryInfo):
             inc_sum = 0
             for i in range(len(results)):
                 idx = len(results) - i - 1
-                inc_queue.put(results[idx]['GDPIncRate'])
+                inc_queue.push(results[idx]['GDPIncRate'])
                 inc_sum = inc_sum + results[idx]['GDPIncRate']
 
             inc_avg = inc_sum / len(results)
@@ -141,11 +142,12 @@ class CountryInfoService(CountryInfo):
                     'InfoYear': start_year
                 })
                 start_year = start_year + 1
-                inc_sum = inc_sum - inc_queue.get()  # 取出队首并删除
+                inc_sum = inc_sum - inc_queue.front()  # 取出队首
+                inc_queue.pop()  # 并删除
                 inc_sum = inc_sum + inc_avg  # 总和加入最新一年的增长率
                 inc_avg = inc_sum / len(results)
                 rawData = rawData * (1 + inc_avg / 100)
-                inc_queue.put(inc_avg)  # 将最新一年增长率放入队列中
+                inc_queue.push(inc_avg)  # 将最新一年增长率放入队列中
 
             return {'code': RET.OK, 'message': error_map_EN[RET.OK], 'data': data}
         except Exception as e:
