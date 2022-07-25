@@ -36,3 +36,7 @@ def get_all_details():
     return CountryInfoOtherResource.get_all_details()
 
 
+# 预测最近五年GDP && 增长率
+@countryinfo_blueprint.route('/forecast/<country_id>', methods=['GET'], endpoint='forecast')
+def forecast(country_id):
+    return CountryInfoOtherResource.forecast(country_id)

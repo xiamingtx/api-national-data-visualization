@@ -28,8 +28,13 @@ class CountryInfoOtherResource(Resource):
 	@classmethod
 	def get_details_by_country_id(cls, country_id):
 
+		parser = reqparse.RequestParser()
+		parser.add_argument('Year', type=int, location='args', required=False, help='Year参数类型不正确或缺失')
+		kwargs = parser.parse_args()
+		kwargs = commons.put_remove_none(**kwargs)
 		if country_id:
-			res = CountryInfoService.get_details_by_country_id(country_id)
+			kwargs['CountryID'] = country_id
+			res = CountryInfoService.get_details_by_country_id(**kwargs)
 		else:
 			return jsonify(code=RET.PARAMERR, message='缺少参数country_id')
 
@@ -57,5 +62,14 @@ class CountryInfoOtherResource(Resource):
 		res = CountryInfoService.get_all_details()
 		if res['code'] == RET.OK:
 			return jsonify(code=res['code'], message=res['message'], data=res['data'], totalCount=res['totalCount'])
+		else:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'])
+
+	# 预测
+	@classmethod
+	def forecast(cls, country_id):
+		res = CountryInfoService.forecast(country_id)
+		if res['code'] == RET.OK:
+			return jsonify(code=res['code'], message=res['message'], data=res['data'])
 		else:
 			return jsonify(code=res['code'], message=res['message'], data=res['data'])
